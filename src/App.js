@@ -1,25 +1,22 @@
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+import { Provider } from "react-redux";
+import store from "./Redux/store/store";
+import '@elastic/eui/dist/eui_theme_light.css';
+
+import { EuiProvider, EuiText } from '@elastic/eui';
+
+import Table from './Components/crud';
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <EuiProvider colorMode="light">
+      <Provider store={store}>
+        <Table/>
+      </Provider>
+    </EuiProvider>
   );
 }
 
 export default App;
+
