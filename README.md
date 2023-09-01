@@ -1,70 +1,349 @@
-# Getting Started with Create React App
+# Old Redux Readme
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This README provides an overview of how to use the Old Redux library in a JavaScript project. In this example, we have a simple to-do list application that uses Redux for state management. We'll cover the main components: actions, reducers, and the store.
 
-## Available Scripts
+## Prerequisites
 
-In the project directory, you can run:
+Before you start, make sure you have Node.js and Yarn installed on your system. You can download and install them from the official websites:
 
-### `yarn start`
+- [Node.js](https://nodejs.org/)
+- [Yarn](https://classic.yarnpkg.com/en/docs/install/)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Project Structure
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The project has the following structure:
 
-### `yarn test`
+```
+src/
+  actions/
+    types.js
+    actions.js
+  reducers/
+    rootReducer.js
+  utils/
+    data.js
+  store.js
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation
 
-### `yarn build`
+To set up the project and use Old Redux, follow these steps:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   ```bash
+   git clone <repository_url>
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. Change to the project directory:
 
-### `yarn eject`
+   ```bash
+   cd <project_directory>
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. Install dependencies using Yarn:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   ```bash
+   yarn install
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Actions
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+In Redux, actions are used to describe changes to the state. In your project, actions are defined in the `actions.js` file and associated action types are defined in the `types.js` file. Here's an example of the actions:
 
-## Learn More
+```javascript
+// actions.js
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+import { listArray } from '../../utils/data';
+import { LIST_ITEMS, ADD_ITEM, UPDATE_ITEM, DELETE_ITEM } from "./types";
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+export const getItems = () => {
+  return { 
+    type: LIST_ITEMS,
+    payload: listArray
+  }
+};
 
-### Code Splitting
+export const addItem = item => {
+  return {
+    type: ADD_ITEM,
+    payload: item
+  };
+};
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+export const updateItem = item => {
+  return {
+    type: UPDATE_ITEM,
+    payload: item
+  };
+};
 
-### Analyzing the Bundle Size
+export const deleteItem = item => {
+  return {
+    type: DELETE_ITEM,
+    payload: item
+  }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Reducers
 
-### Making a Progressive Web App
+Reducers specify how the state of your application changes in response to actions. In your project, reducers are defined in the `rootReducer.js` file. Here's an example of the reducer:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```javascript
+// rootReducer.js
 
-### Advanced Configuration
+import { LIST_ITEMS, ADD_ITEM, UPDATE_ITEM, DELETE_ITEM } from "../actions/types";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+let initialState = {
+  lists: [],
+  item: {}
+};
 
-### Deployment
+const rootReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case LIST_ITEMS:
+      return {
+        ...state,
+        lists: action.payload
+      };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    case ADD_ITEM:
+      return {
+        ...state,
+        lists: [...state.lists, action.payload],
+        item: { ...state.item, loading: false }
+      };
 
-### `yarn build` fails to minify
+    case DELETE_ITEM:
+      const updatedLists = state.lists.filter(item => item.id !== action.payload.id);
+      return {
+        ...state,
+        lists: updatedLists,
+        item: { ...state.item, loading: false }
+      };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    case UPDATE_ITEM:
+      const editedLists = state.lists.map((list) =>
+        list.id === action.payload.id ? action.payload : list
+      );
+      return {
+        ...state,
+        lists: editedLists,
+        item: { ...state.item, loading: false }
+      };
+
+    default:
+      return state;
+  }
+};
+
+export default rootReducer;
+```
+
+## Store
+
+The store is where the application state is held. In your project, the store is configured in the `store.js` file. Here's an example:
+
+```javascript
+// store.js
+
+import { createStore } from "redux";
+import reducer from "../reducers";
+
+const store = createStore(reducer);
+
+export default store;
+```
+
+## Usage
+
+Now that you have set up your actions, reducers, and store, you can use Redux to manage your application state.
+
+In your React components, you can connect to the Redux store using the `react-redux` library and dispatch actions to modify the state.
+
+```javascript
+// Example of connecting a component to Redux /src/components/crud.js
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { getItems ,addItem,deleteItem,updateItem} from "../Redux/actions/action";
+import { EuiTable, EuiTableHeader, EuiTableHeaderCell, EuiTableBody, EuiTableRow, EuiTableRowCell, EuiButton,EuiFieldSearch, EuiSpacer, EuiFlexGroup, EuiFlexItem  } from '@elastic/eui';
+import { v4 } from 'uuid';
+
+
+
+
+const Table = () => {
+    // list all items start
+    const dispatch = useDispatch();
+    const { lists } = useSelector(state => state.lists);
+    useEffect(() => {
+        dispatch(getItems());
+    }, [dispatch]);
+    // list all items end
+
+    //add actions starts
+    const [add ,setAdd] = useState({
+        "title":"",
+        "description":"",
+        "completed":true
+
+    })
+    const handleInputs =(e)=>{
+        e.preventDefault();
+        const {name, value} = e.target;
+        setAdd({...add, [name]:value});
+    }
+    const addDataHandle = () =>{
+        const {title,description,completed} =add;
+        const id = v4();
+        const newDataInput = {
+             id,
+             title,
+             description,
+             completed
+        }
+        if( add.title !== '' && add.description !== ''){
+            dispatch(addItem(newDataInput));
+            setAdd({
+                "title":"",
+                "description":""
+            })
+            window.alert("Data added sucessfully");
+        }
+    }
+    // end of add new items
+
+    // delete action starts
+    const deleteHandle =(list)=>{
+       dispatch(deleteItem(list));
+       window.alert('item deleted Successfully');
+    }
+    // delete action ends
+
+    // update action start
+    const [edit ,setEdit] = useState(false);
+    const [editItem, setEditItem] = useState(null);
+    const editItemHandle =(id)=>{
+        const updatedItem = lists.find((item) => item.id === id);
+        setAdd({
+            ...add,
+            id:id,
+            title:updatedItem.title,
+            description:updatedItem.description,
+            completd:updatedItem.completed
+        })
+        setEdit(true);
+    }
+    const updateDataHandle=()=>{
+        const { id,title,description ,completed} = add;
+        const updatedItem = {
+            id,
+            title,
+            description,
+            completed
+        }
+        dispatch(updateItem(updatedItem));
+        setAdd({
+            "title":"",
+            "description":"",
+            "completed":"",
+        })
+        window.alert("data updated successfully");
+        setEdit(false);
+
+    }
+
+
+
+
+    return (
+        <div className="App">
+          <EuiSpacer size="m"/> 
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false} size="m">
+              <EuiFieldSearch placeholder="type your title.............." name="title" onChange={handleInputs} value={add.title} />
+            </EuiFlexItem>  
+            <EuiFlexItem grow={false} size="m">
+              <EuiFieldSearch placeholder="type your description........" name="description" onChange={handleInputs} value={add.description}/>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} size="m">
+             {edit ? <EuiButton color="primary" onClick={updateDataHandle}>Update</EuiButton> :<EuiButton color="primary" onClick={addDataHandle}>Add</EuiButton>} 
+            </EuiFlexItem>
+          </EuiFlexGroup>
+    
+     
+          <EuiSpacer size="m"/> 
+          <EuiTable>
+            <EuiTableHeader>
+                <EuiTableHeaderCell>S.N</EuiTableHeaderCell>
+                <EuiTableHeaderCell>Title</EuiTableHeaderCell>
+                <EuiTableHeaderCell>Description</EuiTableHeaderCell>
+                <EuiTableHeaderCell>Completed</EuiTableHeaderCell>
+                <EuiTableHeaderCell>Action</EuiTableHeaderCell>
+            </EuiTableHeader>
+            <EuiTableBody>
+                {lists.map((eachData, i) => (
+                    <EuiTableRow key={i}>
+                        <EuiTableRowCell>{i + 1}</EuiTableRowCell>
+                        <EuiTableRowCell>{eachData.title}</EuiTableRowCell>
+                        <EuiTableRowCell>{eachData.description}</EuiTableRowCell>
+                        <EuiTableRowCell>{eachData.completed ? 'Yes' : 'No'}</EuiTableRowCell>
+                        <EuiTableRowCell>
+                           <EuiButton onClick={() => editItemHandle(eachData.id)}>Edit</EuiButton>
+                           <EuiButton color="danger" onClick={() => deleteHandle(eachData)}>Delete</EuiButton>
+                        </EuiTableRowCell>
+                    </EuiTableRow>
+                ))}
+            </EuiTableBody>
+        </EuiTable>
+        </div>
+     
+
+
+    );
+};
+
+export default Table;
+```
+
+```javascript
+// Example of connecting a component to Redux /src/app.js
+import './App.css';
+
+import { Provider } from "react-redux";
+import store from "./Redux/store/store";
+import '@elastic/eui/dist/eui_theme_light.css';
+
+import { EuiProvider, EuiText } from '@elastic/eui';
+
+import Table from './Components/crud';
+
+const App = () => {
+  return (
+    <EuiProvider colorMode="light">
+      <Provider store={store}>
+        <Table/>
+      </Provider>
+    </EuiProvider>
+  );
+}
+
+export default App;
+
+
+```
+
+## Running the Application
+
+To run the application, you can use the following command:
+
+```bash
+yarn start
+```
+
+This will start your development server and allow you to interact with your Redux-powered to-do list application.
+
+## Conclusion
+
+This README provides a basic overview of setting up and using Old Redux in your JavaScript project. By following these steps, you can implement Redux for state management and manage the state of your application in a predictable and centralized manner.
